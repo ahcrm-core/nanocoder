@@ -22,5 +22,10 @@ export function parseContextLimit(value: string): number | null {
 	}
 
 	const multiplier = match[2] === 'k' ? 1000 : 1;
-	return Math.round(parsed * multiplier);
+	const result = Math.round(parsed * multiplier);
+	if (!Number.isFinite(result) || result <= 0) {
+		return null;
+	}
+
+	return result;
 }
