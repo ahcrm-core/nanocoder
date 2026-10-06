@@ -1,0 +1,49 @@
+name: Fresh Holdout 1590 Context Limit
+
+on:
+  push:
+    branches:
+      - first-red/1590-context-limit-overflow
+    paths:
+      - ".github/workflows/fresh-holdout-1590-context-limit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fresh-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify repaired source is frozen
+        run: |
+          ACTUAL=$(git hash-object source/utils/parse-context-limit.ts)
+          echo "Expected source blob: 8ab2490f1176701aaaa8fd9b52c3aa5fb6cbbd5f"
+          echo "Observed source blob: $ACTUAL"
+          test "$ACTUAL" = "8ab2490f1176701aaaa8fd9b52c3aa5fb6cbbd5f"
+
+      - name: Verify fresh holdout cases are frozen
+        run: |
+          ACTUAL=$(git hash-object source/utils/parse-context-limit.holdout.spec.ts)
+          echo "Expected holdout blob: 5516da25efc99339c13f8d376d4062bf6e3a04f6"
+          echo "Observed holdout blob: $ACTUAL"
+          test "$ACTUAL" = "5516da25efc99339c13f8d376d4062bf6e3a04f6"
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run fresh holdout only
+        run: pnpm exec ava source/utils/parse-context-limit.holdout.spec.ts
