@@ -1,0 +1,33 @@
+name: First Red 1590 Context Limit
+
+on:
+  push:
+    branches:
+      - first-red/1590-context-limit-overflow
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  first-red:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run targeted first-red tests
+        run: pnpm exec ava source/utils/parse-context-limit.spec.ts
