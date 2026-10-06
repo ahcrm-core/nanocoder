@@ -82,3 +82,12 @@ test('parseContextLimit - empty string returns null', t => {
 test('parseContextLimit - overflowing digit string returns null', t => {
 	t.is(parseContextLimit('9'.repeat(400)), null);
 });
+
+test('parseContextLimit - rounds sub-unit positive values to zero and must reject them', t => {
+	t.is(parseContextLimit('0.1'), null);
+});
+
+test('parseContextLimit - rejects overflow introduced by k scaling', t => {
+	t.is(parseContextLimit('9'.repeat(308) + 'k'), null);
+});
+
